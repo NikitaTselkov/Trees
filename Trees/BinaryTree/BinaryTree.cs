@@ -28,35 +28,75 @@ namespace Trees.BinaryTree
         {
             if (node != null)
             {
-               Insert(node, RootNode);
+                FindNodeAndPerformsAction(node.Data, RootNode, (data, parent) =>
+                {
+                    if (parent > data)
+                    {
+                        parent.LeftNode = new BinaryNode<T>(data);
+                    }
+                    else
+                    {
+                        parent.RightNode = new BinaryNode<T>(data);
+                    }
+                });
             }
         }
 
         /// <summary>
-        /// Вставляет ноду.
+        /// Поиск узла в бинарном дереве.
         /// </summary>
-        private IBinaryNode<T> Insert(IBinaryNode<T> node, IBinaryNode<T> parent)
+        /// <param name="data"> Искомое значение. </param>
+        public IBinaryNode<T> FindNode(T data)
         {
-            if (parent > node)
+            IBinaryNode<T> result = default;
+
+            if (data != null)
             {
-                if (parent.LeftNode == null)
+                FindNodeAndPerformsAction(data, RootNode, (data, parent) =>
                 {
-                    parent.LeftNode = node;
+                    if (parent.Equals(data))
+                    {
+                       result = parent;
+                    }
+                    else
+                    {
+                        result = null;
+                    }
+                });
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Находит нужный узел и выполняет действие.
+        /// </summary>
+        /// <param name="data"> Значение искомого узла. </param>
+        /// <param name="parent"> Родительский узел. </param>
+        /// <param name="action"> Действие. </param>
+        /// <returns> Узел. </returns>
+        private IBinaryNode<T> FindNodeAndPerformsAction(T data, IBinaryNode<T> parent, Action<T, IBinaryNode<T>> action)
+        {
+            if (parent > data)
+            {
+                if (parent.LeftNode == null || parent.Data.Equals(data))
+                {
+                    action(data, parent);
                 }
                 else
                 {
-                    Insert(node, parent.LeftNode);
+                    FindNodeAndPerformsAction(data, parent.LeftNode, action);
                 }
             }
             else
             {
-                if (parent.RightNode == null)
+                if (parent.RightNode == null || parent.Data.Equals(data))
                 {
-                    parent.RightNode = node;
+                    action(data, parent);
                 }
                 else
                 {
-                    Insert(node, parent.RightNode);
+                    FindNodeAndPerformsAction(data, parent.RightNode, action);
                 }
             }
 

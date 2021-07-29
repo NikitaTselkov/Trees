@@ -14,6 +14,9 @@ namespace Test
             binaryTree.Add(new BinaryNode<int>(15));
             binaryTree.Add(new BinaryNode<int>(-15));
             binaryTree.Add(new BinaryNode<int>(16));
+
+            var node1 = binaryTree.FindNode(16);
+            var node2 = binaryTree.FindNode(17);
         }
     }
 }
