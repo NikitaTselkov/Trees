@@ -13,10 +13,13 @@ namespace Test
 
             binaryTree.Add(new BinaryNode<int>(15));
             binaryTree.Add(new BinaryNode<int>(-15));
-            binaryTree.Add(new BinaryNode<int>(16));
+            binaryTree.Add(-14);
+            binaryTree.Add(-16);
 
-            var node1 = binaryTree.FindNode(16);
+            var node1 = binaryTree.FindNode(new BinaryNode<int>(16));
             var node2 = binaryTree.FindNode(17);
+            binaryTree.Remove(-15);
+            binaryTree.Remove(-14);
         }
     }
 }

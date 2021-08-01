@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Trees.BinaryTree.Interfaces;
@@ -9,6 +10,7 @@ namespace Trees.BinaryTree
     /// <summary>
     /// Нода бинарного дерева.
     /// </summary>
+    [DebuggerDisplay("Data = {Data}")]
     public sealed class BinaryNode<T> : IBinaryNode<T> where T : IComparable<T>
     {
         public T Data { get; private set; }

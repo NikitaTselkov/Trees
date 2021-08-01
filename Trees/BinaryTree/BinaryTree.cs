@@ -4,7 +4,7 @@ using Trees.BinaryTree.Interfaces;
 namespace Trees.BinaryTree
 {
     /// <summary>
-    /// Бинарное дерево.
+    /// Двоичное дерево.
     /// </summary>
     public sealed class BinaryTree<T> : IBinaryTree<T> where T : IComparable<T>
     {
@@ -19,44 +19,71 @@ namespace Trees.BinaryTree
             RootNode = rootNode;
         }
 
+        #region Add
 
         /// <summary>
-        /// Добавление нового узла в бинарное дерево.
+        /// Добавление нового узла в двоичное дерево.
         /// </summary>
         /// <param name="node"> Новый узел. </param>
         public void Add(IBinaryNode<T> node)
         {
             if (node != null)
             {
-                FindNodeAndPerformsAction(node.Data, RootNode, (data, parent) =>
+                FindNodeAndPerformsAction(node.Data, RootNode, (data, currentNode) =>
                 {
-                    if (parent > data)
+                    if (currentNode > data)
                     {
-                        parent.LeftNode = new BinaryNode<T>(data);
+                        currentNode.LeftNode = new BinaryNode<T>(data);
                     }
                     else
                     {
-                        parent.RightNode = new BinaryNode<T>(data);
+                        currentNode.RightNode = new BinaryNode<T>(data);
                     }
                 });
             }
         }
 
         /// <summary>
-        /// Поиск узла в бинарном дереве.
+        /// Добавление нового узла в двоичное дерево.
         /// </summary>
-        /// <param name="data"> Искомое значение. </param>
-        public IBinaryNode<T> FindNode(T data)
+        /// <param name="data"> Значение нового узла. </param>
+        public void Add(T data)
+        {
+            if (data != null)
+            {
+                FindNodeAndPerformsAction(data, RootNode, (data, currentNode) =>
+                {
+                    if (currentNode > data)
+                    {
+                        currentNode.LeftNode = new BinaryNode<T>(data);
+                    }
+                    else
+                    {
+                        currentNode.RightNode = new BinaryNode<T>(data);
+                    }
+                });
+            }
+        }
+
+        #endregion
+
+        #region Find
+
+        /// <summary>
+        /// Поиск узла в двоичном дереве.
+        /// </summary>
+        /// <param name="node"> Искомое значение. </param>
+        public IBinaryNode<T> FindNode(IBinaryNode<T> node)
         {
             IBinaryNode<T> result = default;
 
-            if (data != null)
+            if (node != null)
             {
-                FindNodeAndPerformsAction(data, RootNode, (data, parent) =>
+                FindNodeAndPerformsAction(node.Data, RootNode, (data, currentNode) =>
                 {
-                    if (parent.Equals(data))
+                    if (currentNode.Equals(data))
                     {
-                       result = parent;
+                        result = currentNode;
                     }
                     else
                     {
@@ -69,38 +96,261 @@ namespace Trees.BinaryTree
         }
 
         /// <summary>
+        /// Поиск узла в двоичном дереве.
+        /// </summary>
+        /// <param name="data"> Искомое значение. </param>
+        public IBinaryNode<T> FindNode(T data)
+        {
+            IBinaryNode<T> result = default;
+
+            if (data != null)
+            {
+                FindNodeAndPerformsAction(data, RootNode, (data, currentNode) =>
+                {
+                    if (currentNode.Equals(data))
+                    {
+                       result = currentNode;
+                    }
+                    else
+                    {
+                        result = null;
+                    }
+                });
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region Remove
+
+        /// <summary>
+        /// Удаление узла.
+        /// </summary>
+        /// <param name="node">Удаляемое значение.</param>
+        public void Remove(IBinaryNode<T> node)
+        {
+            var data = node.Data;
+
+            if (data != null)
+            {
+                IBinaryNode<T> parent = default;
+
+                FindNodeAndPerformsAction(data, RootNode, parent, (data, currentNode, parent) =>
+                {
+                    // если узел существует.
+                    if (currentNode.Equals(data))
+                    {
+                        // если у узла нет подузлов, можно его удалить.
+                        if (currentNode.LeftNode == null && currentNode.RightNode == null)
+                        {
+                            if (parent > currentNode)
+                            {
+                                parent.LeftNode = null;
+                            }
+                            else
+                            {
+                                parent.RightNode = null;
+                            }
+                        }
+                        // если нет левого, то правый ставим на место удаляемого.
+                        else if (currentNode.LeftNode == null)
+                        {
+                            if (parent > currentNode)
+                            {
+                                parent.LeftNode = currentNode.RightNode;
+                            }
+                            else
+                            {
+                                parent.RightNode = currentNode.RightNode;
+                            }
+                        }
+                        // если нет правого, то левый ставим на место удаляемого.
+                        else if (currentNode.RightNode == null)
+                        {
+                            if (parent > currentNode)
+                            {
+                                parent.LeftNode = currentNode.LeftNode;
+                            }
+                            else
+                            {
+                                parent.RightNode = currentNode.LeftNode;
+                            }
+                        }
+                        // если оба дочерних присутствуют, 
+                        // то правый становится на место удаляемого,
+                        // а левый вставляется в правый.
+                        else
+                        {
+                            IBinaryNode<T> tempNode = currentNode.LeftNode;
+
+                            if (parent > currentNode)
+                            {
+                                parent.LeftNode = currentNode.RightNode;
+                                parent.LeftNode.LeftNode = tempNode;
+                            }
+                            else
+                            {
+                                parent.RightNode = currentNode.RightNode;
+                                parent.RightNode.LeftNode = tempNode;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// Удаление узла.
+        /// </summary>
+        /// <param name="data">Удаляемое значение.</param>
+        public void Remove(T data)
+        {
+            if (data != null)
+            {
+                IBinaryNode<T> parent = default;
+
+                FindNodeAndPerformsAction(data, RootNode, parent, (data, currentNode, parent) =>
+                {
+                    // если узел существует.
+                    if (currentNode.Equals(data))
+                    {
+                        // если у узла нет подузлов, можно его удалить.
+                        if (currentNode.LeftNode == null && currentNode.RightNode == null)
+                        {
+                            if (parent > currentNode)
+                            {
+                                parent.LeftNode = null;
+                            }
+                            else
+                            {
+                                parent.RightNode = null;
+                            }
+                        }
+                        // если нет левого, то правый ставим на место удаляемого.
+                        else if (currentNode.LeftNode == null)
+                        {
+                            if (parent > currentNode)
+                            {
+                                parent.LeftNode = currentNode.RightNode;
+                            }
+                            else
+                            {
+                                parent.RightNode = currentNode.RightNode;
+                            }
+                        }
+                        // если нет правого, то левый ставим на место удаляемого.
+                        else if (currentNode.RightNode == null)
+                        {
+                            if (parent > currentNode)
+                            {
+                                parent.LeftNode = currentNode.LeftNode;
+                            }
+                            else
+                            {
+                                parent.RightNode = currentNode.LeftNode;
+                            }
+                        }
+                        // если оба дочерних присутствуют, 
+                        // то правый становится на место удаляемого,
+                        // а левый вставляется в правый.
+                        else
+                        {
+                            IBinaryNode<T> tempNode = currentNode.LeftNode;
+
+                            if (parent > currentNode)
+                            {
+                                parent.LeftNode = currentNode.RightNode;
+                                parent.LeftNode.LeftNode = tempNode;
+                            }
+                            else
+                            {
+                                parent.RightNode = currentNode.RightNode;
+                                parent.RightNode.LeftNode = tempNode;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        #endregion
+
+        #region FindNodeAndPerformsAction
+
+        /// <summary>
         /// Находит нужный узел и выполняет действие.
         /// </summary>
         /// <param name="data"> Значение искомого узла. </param>
-        /// <param name="parent"> Родительский узел. </param>
+        /// <param name="currentNode"> Текущий узел. </param>
         /// <param name="action"> Действие. </param>
         /// <returns> Узел. </returns>
-        private IBinaryNode<T> FindNodeAndPerformsAction(T data, IBinaryNode<T> parent, Action<T, IBinaryNode<T>> action)
+        private IBinaryNode<T> FindNodeAndPerformsAction(T data, IBinaryNode<T> currentNode, Action<T, IBinaryNode<T>> action)
         {
-            if (parent > data)
+            if (currentNode > data)
             {
-                if (parent.LeftNode == null || parent.Data.Equals(data))
+                if (currentNode.LeftNode == null || currentNode.Data.Equals(data))
                 {
-                    action(data, parent);
+                    action(data, currentNode);
                 }
                 else
                 {
-                    FindNodeAndPerformsAction(data, parent.LeftNode, action);
+                    FindNodeAndPerformsAction(data, currentNode.LeftNode, action);
                 }
             }
             else
             {
-                if (parent.RightNode == null || parent.Data.Equals(data))
+                if (currentNode.RightNode == null || currentNode.Data.Equals(data))
                 {
-                    action(data, parent);
+                    action(data, currentNode);
                 }
                 else
                 {
-                    FindNodeAndPerformsAction(data, parent.RightNode, action);
+                    FindNodeAndPerformsAction(data, currentNode.RightNode, action);
                 }
             }
 
-            return parent;
+            return currentNode;
         }
+
+        /// <summary>
+        /// Находит нужный узел и выполняет действие.
+        /// </summary>
+        /// <param name="data"> Значение искомого узла. </param>
+        /// <param name="currentNode"> Текущий узел. </param>
+        /// <param name="parentNode"> Родительский узел. </param>
+        /// <param name="side"> Положение currentNode относительно parentNode. </param>
+        /// <param name="action"> Действие. </param>
+        /// <returns> Узел. </returns>
+        private IBinaryNode<T> FindNodeAndPerformsAction(T data, IBinaryNode<T> currentNode, IBinaryNode<T> parentNode, Action<T, IBinaryNode<T>, IBinaryNode<T>> action)
+        {
+            if (currentNode > data)
+            {
+                if (currentNode.LeftNode == null || currentNode.Data.Equals(data))
+                {
+                    action(data, currentNode, parentNode);
+                }
+                else
+                {
+                    FindNodeAndPerformsAction(data, currentNode.LeftNode, currentNode, action);
+                }
+            }
+            else
+            {
+                if (currentNode.RightNode == null || currentNode.Data.Equals(data))
+                {
+                    action(data, currentNode, parentNode);
+                }
+                else
+                {
+                    FindNodeAndPerformsAction(data, currentNode.RightNode, currentNode, action);
+                }
+            }
+
+            return currentNode;
+        }
+
+        #endregion
     }
 }
